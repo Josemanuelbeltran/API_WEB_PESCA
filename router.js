@@ -9,6 +9,8 @@ const verifytoken = require('./middlewares/verifytoken');
 router.get("/test",testdriver.test)
 
 router.get("/inventario",verifytoken.checktoken,inventariodriver.list)
+router.post("/inventario/getbycat",inventariodriver.getbycat)
+router.post("/inventario/getbycatuser",verifytoken.checktoken,inventariodriver.getByCatUser)
 router.get("/inventario/:id",verifytoken.checktoken,inventariodriver.get)
 router.post("/inventario/add",verifytoken.checktoken,inventariodriver.add)
 router.delete("/inventario/delete/:id",verifytoken.checktoken,inventariodriver.delete)

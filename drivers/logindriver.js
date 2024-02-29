@@ -1,9 +1,8 @@
-
-
 const { where,Op } = require("sequelize")
-const User = require("../models/user")
+const User = require("../models/User")
 const tokengenerator = require("jsonwebtoken")
 const encript = require("bcrypt")
+require('dotenv').config({path:'.env'})
 
 
 
@@ -32,38 +31,43 @@ exports.register =  async function(request,reponse){
     
 }
 
+function isPasswordMatch(pass1,pass2){
+    return encript.compareSync(pass1,pass2)
+}
+
 exports.logear = async function(request,reponse){
+    console.log(request.body)
     let name = request.body.name
     let password = request.body.password
     let email = request.body.email
     let us;
     let use;
     let token;
-
-    if (name == undefined){  
-        us = await User.findOne({where:{email:email}})
-        const isPasswordMatch = encript.compareSync(request.body.password,us.password);
-        if(us =! null && isPasswordMatch){
-            
-            //raruno lo del payload
-            token = tokengenerator.sign({payload:us.name},"elcaballodesantiago",{expiresIn:"4h"})
-            console.log(token)
-            return reponse.status(200).send("inicio de sesion correcto")
-        }
-        return reponse.status(200).send("name undefined")
+    if (name == undefined && email == undefined){
+        return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
     }
-        
+    if (name == undefined){ 
+        us = await User.findOne({where:{email:email}})
+        if (!us){
+            return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
+        }
+        if(isPasswordMatch(password,us.password)){
+            token = tokengenerator.sign({payload:us.id},process.env.LG_SECRET,{expiresIn:"4h"})
+            return reponse.status(200).json({"estado":"inicio de sesion correcto",
+            "token":token})
+        }
+        return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
+    }
     if (email == undefined) {
         use = await User.findOne({where:{name:name}})
-        if(use =! null && use.password== password){
-            
-            return reponse.status(200).send("inicio de sesion correcto")
+        if (!use){
+            return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
         }
-        return reponse.status(200).send("name undefined")
+        if(isPasswordMatch(password,use.password)){
+            token = tokengenerator.sign({payload:use.id},process.env.LG_SECRET,{expiresIn:"4h"})
+            return reponse.status(200).send(token)
+        }
+        return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
     } 
-            
-    else {
-        return reponse.status(200).send("introduce valores")
-    }
 }
 

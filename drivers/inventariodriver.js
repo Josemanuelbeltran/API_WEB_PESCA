@@ -1,17 +1,58 @@
 
 const { where,Op } = require("sequelize")
-const User = require("../models/products");
-const Product = require("../models/products");
-
+const User = require("../models/User");
+const Product = require("../models/Article");
+const Category = require("../models/Category");
+const Article = require("../models/Article");
+const user_article = require("../models/user_article");
 
 
 exports.list = async function(request,reponse){
     // Consultar la base de datos para obtener los datos
-        const datos = await Product.findAll(); // Esto supone que tienes un método 'findAll' en tu modelo
-
-        // Enviar la respuesta en formato JSON
+        const datos = await Product.findAll(); 
+        
         return reponse.status(200).json(datos);
 }
+
+exports.getbycat = async function(request,reponse){
+    id_categorye= request.body.id_category
+    const resultados = await Product.findAll({
+        include:{model:Category,where:{
+            id:id_categorye
+        }
+    }
+    });
+
+    return reponse.status(200).json(resultados)
+
+}
+
+// Suponiendo que ya has importado el modelo Product y configurado Sequelize
+
+exports.getByCatUser = async function(request, response) {
+    const id_category = request.body.id_category;
+    const id_user = request.userid;
+
+    const result = await Article.findAll({
+        attributes: ['brand', 'model', 'price', 'year'],
+        include: [
+           {
+                model: User,
+                where: { id: id_user },attributes:[]
+           },
+           {
+                model:Category,
+                where: { id: id_category },
+                attributes:['name']
+           }
+        ]
+        
+      })
+      return response.status(200).json(result)
+      
+}
+
+
 
 exports.get = async function(request,reponse){
     const idDatos = request.params.id;
