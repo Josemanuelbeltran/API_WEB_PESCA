@@ -10,7 +10,7 @@ exports.startbd = async function(){
 
     // Define las relaciones entre los modelos
     User.belongsToMany(Article, { through: UserArticle,foreignKey:"id_user"});
-    Article.belongsToMany(User, { through: UserArticle,foreignKey:"id_article" });
+    Article.belongsToMany(User, { through: UserArticle,foreignKey:"id_article"});
     Article.belongsTo(Category,{foreignKey:"id_category"})
 
     try{

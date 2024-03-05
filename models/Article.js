@@ -12,7 +12,8 @@ const Article = cdatabase.define("Article",{
     brand:DataTypes.STRING,
     model:DataTypes.STRING,
     year:DataTypes.INTEGER,
-    price:DataTypes.DECIMAL},
+    price:DataTypes.DECIMAL,
+    type:DataTypes.DECIMAL},
     {timestamps:false})
 
 
