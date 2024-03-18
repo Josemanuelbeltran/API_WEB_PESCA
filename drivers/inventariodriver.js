@@ -7,7 +7,9 @@ const Category = require("../models/Category");
 const Article = require("../models/Article");
 const user_article = require("../models/user_article");
 const { response } = require("express");
-
+const cdatabase = require("../config/database")
+const sharp = require('sharp');
+const Jimp = require('jimp')
 
 exports.list = async function(request,reponse){
     // Consultar la base de datos para obtener los datos
@@ -35,7 +37,7 @@ exports.getCount = async function(request, response) {
         const results = await user_article.findAll({
         attributes: ['id_article', [sequelize.fn('COUNT', sequelize.col('*')), 'cantidad']],
         where: {
-          id_user: 1,
+          id_user: id_user,
           id_article: {
             [sequelize.Op.in]: sequelize.literal(`(SELECT id FROM articles WHERE id <= (SELECT MAX(id) FROM articles))`)
           }
@@ -70,7 +72,7 @@ exports.getByCatUser = async function(request, response) {
         const count = await user_article.findAll({
         attributes: [ 'id_user','id_article', [sequelize.fn('COUNT', sequelize.col('*')), 'cantidad']],
         where: {
-          id_user: 1,
+          id_user: id_user,
           id_article: {
             [sequelize.Op.in]: sequelize.literal(`(SELECT id FROM articles WHERE id <= (SELECT MAX(id) FROM articles))`)
           }
@@ -84,6 +86,7 @@ exports.getByCatUser = async function(request, response) {
         console.log(a.id)
         //console.log(JSON.stringify(count_article))
         article_w_count.push({
+            id:a.id,
             cantidad:count_article.dataValues.cantidad,
             brand:a.brand,
             model:a.model,
@@ -96,8 +99,6 @@ exports.getByCatUser = async function(request, response) {
       return response.status(200).json(article_w_count)
       
 }
-
-
 
 exports.get = async function(request,reponse){
     const idDatos = request.params.id;
@@ -145,15 +146,21 @@ exports.add = async function(request,reponse){
 
 exports.delete = async function(request,reponse){
     try {
-        const idDatos = request.params.id;
-
+        const id_user = request.userid;
+        const id_article = request.body.id_article
         // Utiliza el método destroy de Sequelize para eliminar el registro por ID
-        const resultado = await Product.destroy({
+        const resultado = await user_article.destroy({
             where: {
-                id: idDatos
-            }
+                id_user : id_user,
+                id_article: id_article
+                
+            },limit:1
+            
         });
+        console.log(id_article,id_user)
+        console.log(resultado)
 
+    
         if (resultado > 0) {
             // Si se eliminó al menos un registro, significa que se borró correctamente
             return reponse.status(200).json({
@@ -170,6 +177,7 @@ exports.delete = async function(request,reponse){
         return response.status(500).json({ message: 'Error interno del servidor' });
     }
 }
+
 exports.update =async function(request,response){
     try {
         const idDatos = request.params.id;
@@ -236,3 +244,44 @@ exports.add_user_article = async function(request,response){
         return response.status(500).json({ message: 'Error interno del servidor' });
     }
 }
+
+exports.getname = async function(request,response){
+    const id_user = request.userid;
+    const query = "SELECT SUM(a.price) AS total, u.name , u.email , u.photo FROM articles a JOIN user_articles ua ON a.id = ua.id_article JOIN users u ON u.id = ua.id_user WHERE ua.id_user = "+id_user+";"
+    const [result] = await cdatabase.query(query, { type: sequelize.QueryTypes.SELECT });    
+    //Ruta de la imagen original
+        const imagePath = '../API_PESCA/assets/img_profile/'+result.photo+'.webp';
+
+        console.log(result.photo)
+
+        // Ruta donde guardar la imagen redimensionada
+        const resizedImagePath = '../API_PESCA/assets/img_profile/'+result.photo+'_resized.JPG';
+        console.log(resizedImagePath)
+        // Tamaño deseado para la imagen redimensionada
+        const width = 50; // Ancho en píxeles
+        const height = 50;
+
+        
+
+        // Ruta donde guardar la imagen convertida a JPG
+        const imagePathJPG = '../API_PESCA/assets/img_profile/'+result.photo+'.jpg';
+
+        // Convertir la imagen de WebP a JPG
+        sharp(imagePath)
+            .jpeg() // Especificar el formato de salida como JPG
+            .toFile(imagePathJPG, (err, info) => {
+                if (err) {
+                } else {
+                    console.log('Imagen convertida con éxito:', info);
+                }
+            });
+         const image = await Jimp.read(imagePathJPG);
+         await image.resize(width, Jimp.AUTO).quality(50).writeAsync(resizedImagePath);   
+        return response.status(200).json(result);
+
+}
+
+
+
+
+

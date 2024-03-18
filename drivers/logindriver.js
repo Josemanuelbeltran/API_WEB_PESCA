@@ -24,11 +24,8 @@ exports.register =  async function(request,reponse){
         const  hash  =  encript . hashSync ( password ,10) ;
         await User.create({name:name,password:hash,email:email})
         return reponse.status(200).send("creado con exito")
-       
     }
     return reponse.status(200).send("mal creado")
-
-    
 }
 
 function isPasswordMatch(pass1,pass2){

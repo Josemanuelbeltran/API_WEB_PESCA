@@ -12,7 +12,7 @@ exports.startbd = async function(){
     User.belongsToMany(Article, { through: UserArticle,foreignKey:"id_user"});
     Article.belongsToMany(User, { through: UserArticle,foreignKey:"id_article"});
     Article.belongsTo(Category,{foreignKey:"id_category"})
-
+    
     try{
         await datadb.authenticate()
     }catch(error){

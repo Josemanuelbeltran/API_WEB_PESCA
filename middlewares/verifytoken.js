@@ -1,3 +1,4 @@
+
 const jwt = require('jsonwebtoken');
 const { response } = require("express");
 const tokengenerator = require("jsonwebtoken");
@@ -12,7 +13,8 @@ const check = (err, decoded) => {
 
 exports.checktoken =  async function(request,reponse,next){
     if(!tokengenerator.verify(request.headers.authorization,process.env.LG_SECRET,check)){
-        return reponse.status(401).send('Acceso denegado');
+        
+        return reponse.status(401).send('Acceso denegado, inicie sesion');
     }
     const decodedPayload = jwt.decode(request.headers.authorization);
     request.userid = decodedPayload.payload
