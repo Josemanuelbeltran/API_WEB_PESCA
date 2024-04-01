@@ -15,6 +15,9 @@ app.use(express.urlencoded({extended:true}))
 //     methods:['POST','GET','PUT','DELETE'],
 //     allowedHeaders:'*' //'authorization,Content-Type'
 // }));
+
+
+app.use('/assets/img_profile', express.static('assets/img_profile'));
 app.use("/",router)
 
 

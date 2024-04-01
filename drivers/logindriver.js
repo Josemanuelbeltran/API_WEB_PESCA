@@ -34,7 +34,7 @@ function isPasswordMatch(pass1,pass2){
 
 exports.logear = async function(request,reponse){
     console.log(request.body)
-    let name = request.body.name
+    let name = request.body.name;debugger;
     let password = request.body.password
     let email = request.body.email
     let us;
@@ -50,8 +50,7 @@ exports.logear = async function(request,reponse){
         }
         if(isPasswordMatch(password,us.password)){
             token = tokengenerator.sign({payload:us.id},process.env.LG_SECRET,{expiresIn:"4h"})
-            return reponse.status(200).json({"estado":"inicio de sesion correcto",
-            "token":token})
+            return reponse.status(200).send(token)
         }
         return reponse.status(401).send("nombre de usuario o contraseña incorrecta")
     }

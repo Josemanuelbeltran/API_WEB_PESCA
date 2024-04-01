@@ -250,34 +250,33 @@ exports.getname = async function(request,response){
     const query = "SELECT SUM(a.price) AS total, u.name , u.email , u.photo FROM articles a JOIN user_articles ua ON a.id = ua.id_article JOIN users u ON u.id = ua.id_user WHERE ua.id_user = "+id_user+";"
     const [result] = await cdatabase.query(query, { type: sequelize.QueryTypes.SELECT });    
     //Ruta de la imagen original
-        const imagePath = '../API_PESCA/assets/img_profile/'+result.photo+'.webp';
+        const imagePath = 'assets/img_profile/'+result.photo;
 
-        console.log(result.photo)
+        try {
+            return response.status(200).json(result,resizedImagePath);
 
-        // Ruta donde guardar la imagen redimensionada
-        const resizedImagePath = '../API_PESCA/assets/img_profile/'+result.photo+'_resized.JPG';
-        console.log(resizedImagePath)
-        // Tamaño deseado para la imagen redimensionada
-        const width = 50; // Ancho en píxeles
-        const height = 50;
+        } catch (error) {
+            // Ruta donde guardar la imagen redimensionada
+            const resizedImagePath = '../API_PESCA/assets/img_profile/'+result.photo+'_resized.JPG';
+            // Tamaño deseado para la imagen redimensionada
+            const width = 50; // Ancho en píxeles
+            const height = 50;
+            // Ruta donde guardar la imagen convertida a JPG
+            const imagePathJPG = '../API_PESCA/assets/img_profile/'+result.photo+'.jpg';
+
+            // Convertir la imagen de WebP a JPG
+            await sharp(imagePath)
+                .jpeg() // Especificar el formato de salida como JPG
+                .toFile(imagePathJPG);
+            const image = await Jimp.read(imagePathJPG);
+            await image.resize(width, Jimp.AUTO).quality(50).writeAsync(resizedImagePath);
+            result.photo = "http://localhost:3000/assets/img_profile/"+result.photo+"_resized.JPG"
+            console.log(result.photo)
+            return response.status(200).json(result);
+        }
 
         
-
-        // Ruta donde guardar la imagen convertida a JPG
-        const imagePathJPG = '../API_PESCA/assets/img_profile/'+result.photo+'.jpg';
-
-        // Convertir la imagen de WebP a JPG
-        sharp(imagePath)
-            .jpeg() // Especificar el formato de salida como JPG
-            .toFile(imagePathJPG, (err, info) => {
-                if (err) {
-                } else {
-                    console.log('Imagen convertida con éxito:', info);
-                }
-            });
-         const image = await Jimp.read(imagePathJPG);
-         await image.resize(width, Jimp.AUTO).quality(50).writeAsync(resizedImagePath);   
-        return response.status(200).json(result);
+        
 
 }
 
