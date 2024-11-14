@@ -2,7 +2,6 @@ const {DataTypes} = require("sequelize")
 const cdatabase = require("../config/database")
 //const Article = require("./Article")
 const UserArticle = require("./user_article")
-const findOrCreate = require('mongoose-findorcreate')
 
 const User = cdatabase.define("User",{
     id:{type:DataTypes.INTEGER,
@@ -10,7 +9,9 @@ const User = cdatabase.define("User",{
     autoIncrement:true},
     name:DataTypes.STRING,
     password:DataTypes.STRING,
-    email:DataTypes.STRING
+    email:DataTypes.STRING,
+    photo:DataTypes.STRING,
+    phone_number:DataTypes.STRING
     },{timestamps:false})
 
 //User.belongsToMany(Article, { through:UserArticle });

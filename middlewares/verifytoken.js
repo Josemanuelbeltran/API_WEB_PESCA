@@ -12,11 +12,11 @@ const check = (err, decoded) => {
     return true;}
 
 exports.checktoken =  async function(request,reponse,next){
-    if(!tokengenerator.verify(request.headers.authorization,process.env.LG_SECRET,check)){
+     if(!tokengenerator.verify(request.headers.authorization,process.env.LG_SECRET,check)){
         
-        return reponse.status(401).send('Acceso denegado, inicie sesion');
-    }
-    const decodedPayload = jwt.decode(request.headers.authorization);
-    request.userid = decodedPayload.payload
+         return reponse.status(401).send('Acceso denegado, inicie sesion');
+     }
+     const decodedPayload = jwt.decode(request.headers.authorization);
+     request.userid = decodedPayload.payload
     next();
 }
